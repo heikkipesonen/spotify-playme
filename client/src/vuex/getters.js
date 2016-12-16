@@ -8,6 +8,18 @@ const getters = {
    *  return state.something
    * }
    */
+
+  track (state) {
+    return state.track
+  },
+
+  showSearch (state) {
+    return state.searchOpen
+  },
+
+  searchResults (state) {
+    return state.searchResults
+  }
 }
 
 export default getters

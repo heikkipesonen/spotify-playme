@@ -1,4 +1,5 @@
 'use strict';
+
 require('dotenv').config();
 let SpotifyWebApi = require('spotify-web-api-node');
 
@@ -8,114 +9,53 @@ let spotifyApi = new SpotifyWebApi({
   redirectUri : process.env.REDIRECT_URI
 });
 
-let spotify = require('spotify-node-applescript');
+const cache = {};
 
-let api = {
+const spotify = {
 
-    currentTrack: null,
-
-    state: null,
-
-    get position () {
-        if (api.currentTrack && api.state) {
-            let position = this.state.position / this.currentTrack.duration;
-            position = position > 1 ? 1 : position < 0 ? 0 : position;
-
-            return position;
+    setCache (path, key, value) {
+        if (!cache[path]) {
+            cache[path] = {};
         }
-
-        return 0;
+        cache[path][key] = value;
     },
 
-    parseIdFromUri (trackId) {
-        return trackId.slice(trackId.lastIndexOf(':') +1);
-    },
-
-    createkUriFromId (id, type) {
-        type = type ? type : 'track';
-        return `spotify:${type}:$id`;
-    },
-
-    _toPromise (fn, args) {
+    getCache (path, key) {
         return new Promise((resolve, reject) => {
+            if (cache[path] && cache[path][key]) {
+                resolve(cache[path][key]);
+            } else {
+                reject(false);
+            }
+        });
+    },
 
-            args = args ? args : [];
+    _respond (response) {
+        return response.body;
+    },
 
-            args.push((err, response) => {
-                if (!err) {
-                    resolve(response);
-                } else {
-                    reject(err);
-                }
+    getTrack (id) {
+        return spotify.getCache('track', id).then((track) => track, () => {
+            return spotifyApi.getTrack(id).then(spotify._respond).then((track) => {
+                spotify.setCache('track', track.id, track);
+                return track;
             });
-
-            fn.apply(null, args);
         })
     },
 
-    getState () {
-        return this._toPromise(spotify.getState).then((state) => {
-            state.position = state.position * 1000;            
-            return state;
+    getAlbum (id) {
+        return spotify.getCache('album', id).then((album) => album, () => {
+            return spotifyApi.getAlbum(id).then(spotify._respond).then((album) => {
+                spotify.setCache('album', album.id, album);
+                return album;
+            });
         });
-    },    
-
-    playTrack (id) {
-        return this._toPromise(spotify.playTrack, [api.createkUriFromId(id)]);
     },
 
-    getCurrentTrack () {
-        return this._toPromise(spotify.getTrack);
-    },
-
-    polling: null,
-
-    start () {
-        api.polling = setInterval(() => {
-            api.getState().then((state) => {            
-                api.state = state;                
-                
-                api._fire('update', [api.state, api.position]);
-   
-                if (!api.currentTrack || (api.currentTrack && state.track_id !== api.currentTrack.id)) {
-                    api.getCurrentTrack().then((track) => {
-                        api.currentTrack = track;
-                        api._fire('trackchange', [api.currentTrack]);
-                    });
-                }                
-            });
-        }, 1000);
-    },
-
-    stop () {
-        clearInterval(api.polling);
-    },
-
-    _listeners: {},
-
-    on (event, fn) {
-        if (!api._listeners[event]) {
-            api._listeners[event] = [];
-        }
-
-        api._listeners[event].push(fn);
-    },
-
-    _fire (event, args) {
-        if (!args) {
-            args = [];
-        }
-
-        if (api._listeners[event]) {            
-            api._listeners[event].forEach((listener) => {
-                try {
-                    listener.apply(api, args);                
-                } catch (e) {
-                    console.log(e)
-                }
-            });
-        }
+    search (query, types) {
+        return spotifyApi.search(query, types).then(spotify._respond);
     }
+
 }
 
-module.exports = api;
+module.exports = spotify;

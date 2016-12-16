@@ -11,7 +11,10 @@ Vue.use(Vuex)
  * @type {Object}
  */
 const state = {
-
+  track: {},
+  player: {},
+  searchOpen: false,
+  searchResults: []
 }
 
 /* eslint-disable no-new */

@@ -1,0 +1,8 @@
+$theme: (
+  primary: rgb(255, 255, 255),
+  bgPrimary: #222
+);
+
+@mixin theme($property, $color) {
+  #{$property}: map_get($theme, $color);
+}
