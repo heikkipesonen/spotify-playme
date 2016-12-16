@@ -55,7 +55,7 @@ let api = {
 
     getState () {
         return this._toPromise(spotify.getState).then((state) => {
-            state.position = state.position * 1000;
+            state.position = state.position * 1000;            
             return state;
         });
     },    
@@ -73,9 +73,10 @@ let api = {
     start () {
         api.polling = setInterval(() => {
             api.getState().then((state) => {            
-                api.state = state;
-                api._fire('update', [api.state]);
+                api.state = state;                
                 
+                api._fire('update', [api.state, api.position]);
+   
                 if (!api.currentTrack || (api.currentTrack && state.track_id !== api.currentTrack.id)) {
                     api.getCurrentTrack().then((track) => {
                         api.currentTrack = track;
@@ -105,9 +106,13 @@ let api = {
             args = [];
         }
 
-        if (api._listeners[event]) {
+        if (api._listeners[event]) {            
             api._listeners[event].forEach((listener) => {
-                listener.apply(api, args);
+                try {
+                    listener.apply(api, args);                
+                } catch (e) {
+                    console.log(e)
+                }
             });
         }
     }

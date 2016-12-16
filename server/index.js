@@ -10,12 +10,12 @@ io.on('connect', (socket) => {
 
 spotify.start();
 
-spotify.on('update', (state) => {
-    socket.emit('update', state);    
+spotify.on('update', (state) => {    
+    io.emit('update', state);    
 });
 
-spotify.on('trackchange', (state) => {
-    socket.emit('trackchange', state);    
+spotify.on('trackchange', (state) => {    
+    io.emit('trackchange', state);    
 });
 
 
