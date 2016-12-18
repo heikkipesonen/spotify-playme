@@ -99,8 +99,9 @@ export default {
       max-width: 400px;
       background-color: rgba(0,0,0,0.3);
       box-shadow: 0px 0px 150px 0px rgba(0,0,0,0.3);
-      transition-duration: 0.5s;
+      transition-duration: 0.4s;
       transition-property: opacity, transform;
+      transition-timing-function: cubic-bezier(0.000, 0.120, 0.235, 1.010);
     }
 
     &.search-open {
@@ -123,16 +124,16 @@ export default {
     }
   }
 
-  .window-enter-active, .window-leave-active {
-    transition-propert: opacity, transform;
-    transition-duration:  0.4s;
+  .window-enter-active, .window-leave {
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.000, 0.120, 0.235, 1.010);
+    transition-duration:  0.3s;
     transform: translate3d(0, 0, 0);
   }
 
-  .window-enter, .window-leave {
+  .window-enter, .window-leave-active {
     opacity: 0;
-    transition-duration:  0.4s;
-    transition-propert: opacity, transform;
+    transition-duration:  0.3s;
     transform: translate3d(100%, 0, 0);
   }
 </style>

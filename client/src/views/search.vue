@@ -6,7 +6,7 @@
             <input-container label="search" v-model="query"></input-container>
           </form>
         </div>
-        <div class="track-list">
+        <div class="track-list" ref="trackList">
           <transition-group name="tracklist">
             <track-preview :track="track" :key="track" v-for="track in searchResults"></track-preview>
           </transition-group>
@@ -52,6 +52,8 @@ export default {
     commitSearch () {
       rest.search(this.query, ['track']).then((response) => {
         this.setSearchResults(response.tracks.items)
+
+        this.$refs.trackList.scrollTop = 0
       })
     }
   }
@@ -59,9 +61,6 @@ export default {
 </script>
 <style lang="scss" scoped>
   @import '../styles/theme';
-
-  .search-overlay {
-  }
 
   .input {
     padding: 32px;
@@ -107,5 +106,19 @@ export default {
     flex-direction: column;
     @include theme('background-color', 'bgPrimary');
     box-shadow: 0px 0px 150px 0px rgba(0,0,0,0.7);
+  }
+
+  .toolbar {
+    position: absolute;
+    top: 0;
+    left: -64px;
+    right: auto;
+    width: 64px;
+    flex-direction: column;
+
+    button {
+      @include theme('background-color', 'bgPrimary');
+      height: 64px;
+    }
   }
 </style>
